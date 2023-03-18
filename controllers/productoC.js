@@ -62,10 +62,8 @@ const añadirProductoCarrito = async (req, resp = response) => {
         dbCarrito.items.forEach(e => {
             const add = e.total;
             sum = sum + add;
-            console.log(e);
-        }); 
 
-        console.log(sum);
+        }); 
 
         await Carrito.findByIdAndUpdate(
             id,
@@ -123,7 +121,6 @@ const añadirProductoCarrito = async (req, resp = response) => {
 
 const getAll = async ( req, resp = response) =>{
     const productos = await Producto.find();
-    console.log(req.user)
     resp.json(productos)
 }
 

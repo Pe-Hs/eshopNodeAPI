@@ -12,6 +12,15 @@ const ProductoSchema = Schema ({
         type: Number,
         requried: true,
     },
+    estado:{
+        type: String,
+        require: true
+    },
+    cantidad:{
+        type: Number,
+        require:true,
+        min: [1, "Cantidad no puede ser Menor que 1"],
+    },
     stock: {
         type: Number,
         require: true,

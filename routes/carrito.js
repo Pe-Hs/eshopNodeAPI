@@ -4,7 +4,7 @@ const { getAll, crearCarrito, getCarrito, removeProducto } = require('../control
 
 const router = Router();
 
-router.post('/cart', crearCarrito)
+router.post('/newCart', crearCarrito)
 router.get('/getcart', getCarrito)
 router.put('/delcart/:id', removeProducto)
 router.get('/getall', getAll)
