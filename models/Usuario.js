@@ -18,6 +18,9 @@ const UsuarioSchema = Schema({
         type: String,
         require: true,
         default: 'CLIENTE'
+    },
+    nroCelular: {
+        type: String,
     }
 });
 

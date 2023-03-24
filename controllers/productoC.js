@@ -1,17 +1,17 @@
-const {response} = require('express')
+const { response } = require('express')
 const Producto = require('../models/Producto')
 const Carrito = require('../models/Carrito');
 const Item = require('../models/Item');
 
-const crearProducto = async (req , resp = response) => {
+const crearProducto = async (req, resp = response) => {
 
-    const {nombreProducto, descripcionProducto, precioUnitario} = req.body;
+    const { nombreProducto, descripcionProducto, precioUnitario } = req.body;
 
     try {
 
-        let producto = await Producto.findOne( {nombreProducto} )
+        let producto = await Producto.findOne({ nombreProducto })
 
-        if(producto){
+        if (producto) {
             return resp.status(400).json({
                 ok: false,
                 msg: 'Producto ya Existe'
@@ -26,7 +26,7 @@ const crearProducto = async (req , resp = response) => {
             ok: true,
             id: dbProducto.id,
         })
-        
+
     } catch (error) {
         console.log(error);
 
@@ -51,7 +51,7 @@ const añadirProductoCarrito = async (req, resp = response) => {
             .populate({
                 path: 'items'
             })
-             .exec();
+            .exec();
 
         const dbItem = new Item(item)
 
@@ -63,13 +63,13 @@ const añadirProductoCarrito = async (req, resp = response) => {
             const add = e.total;
             sum = sum + add;
 
-        }); 
+        });
 
         await Carrito.findByIdAndUpdate(
             id,
             {
                 $push: { items: newItemId },
-                $set:  { subTotal: sum }
+                $set: { subTotal: sum }
             }
         )
 
@@ -77,7 +77,7 @@ const añadirProductoCarrito = async (req, resp = response) => {
             ok: true,
             msg: 'Se agrego al Carrito',
         })
-        
+
     } catch (error) {
         console.log(error);
 
@@ -87,45 +87,80 @@ const añadirProductoCarrito = async (req, resp = response) => {
         })
     }
 
-
-    // try {
-
-    //     const f = await Carrito.findOne({productos : productos})
-
-    //     const a = await Producto.findById(productos)
-
-    //     await Carrito.findByIdAndUpdate(
-    //         id,
-    //         {
-    //             $push: { productos: productos }
-    //         },
-    //         {
-    //             useFindAndModify: false
-    //         }
-    //     );
-
-    //     return resp.status(200).json({
-    //         ok: true,
-    //         msg: 'Se agrego al Carrito',
-    //     })
-
-    // } catch (error) {
-    //     console.log(error);
-
-    //     return resp.status(500).json({
-    //         ok: false,
-    //         msg: 'Error Inesperado'
-    //     })
-    // }
 }
 
-const getAll = async ( req, resp = response) =>{
-    const productos = await Producto.find();
-    resp.json(productos)
+const updateProducto = async (req, resp = response) => {
+
+    const id = req.params.id;
+
+    const { nombreProducto, descripcionProducto, precioUnitario, estado, cantidad, stock, categoria } = req.body;
+
+    try {
+
+        let producto = await Producto.findById(id);
+
+        if (!producto) {
+            return resp.status(400).json({
+                ok: false,
+                msg: 'Producto no Existe'
+            })
+        }
+
+
+        await Producto.findByIdAndUpdate(
+            id,
+            {
+                $set: {
+                    nombreProducto: nombreProducto,
+                    descripcionProducto: descripcionProducto,
+                    precioUnitario: precioUnitario,
+                    estado: estado,
+                    cantidad: cantidad,
+                    stock: stock,
+                    categoria: categoria
+                }
+            }
+        );
+
+        return resp.status(200).json({
+            ok: true,
+            msg: 'Producto Actualizado'
+        })
+
+
+    } catch (error) {
+
+        console.log(error);
+
+        return resp.status(500).json({
+            ok: false,
+            msg: 'Error Inesperado'
+        })
+    }
+
+}
+
+const getAll = async (req, resp = response) => {
+    
+    try {
+
+        const productos = await Producto.find();
+        resp.json(productos)
+
+    } catch (error) {
+        console.log(error);
+
+        return resp.status(500).json({
+            ok: false,
+            msg: 'Error Inesperado'
+        })
+    }
+
 }
 
 module.exports = {
     crearProducto,
     getAll,
-    añadirProductoCarrito
+    añadirProductoCarrito,
+    updateProducto
 }

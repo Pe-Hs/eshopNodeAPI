@@ -94,6 +94,7 @@ const loginUsuario = async (req, resp = response) => {
             ok: true,
             uid: dbUsuario.id,
             usuario: dbUsuario.usuario,
+            rol: dbUsuario.rol,
             token
         })
         
