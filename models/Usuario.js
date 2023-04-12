@@ -1,10 +1,6 @@
 const { Schema, model } = require("mongoose");
 
 const UsuarioSchema = Schema({
-    usuario: {
-        type: String,
-        requried: true,
-    },
     email:{
         type: String,
         required: true,
@@ -18,9 +14,6 @@ const UsuarioSchema = Schema({
         type: String,
         require: true,
         default: 'CLIENTE'
-    },
-    nroCelular: {
-        type: String,
     }
 });
 

@@ -12,6 +12,11 @@ const CarritoSchema = Schema({
             ref: 'Item'
         }
     ],
+    estado: {
+        type: Boolean,
+        require: true,
+        default: false
+    },
     subTotal: {
         default: 0,
         type: Number,

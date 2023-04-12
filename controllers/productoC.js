@@ -49,11 +49,13 @@ const añadirProductoCarrito = async (req, resp = response) => {
 
         const dbCarrito = await Carrito.findById(id)
             .populate({
-                path: 'items'
+                path: 'items',
             })
             .exec();
 
         const dbItem = new Item(item)
+
+        dbItem.total = dbItem.cantidad * dbItem.precio;
 
         await dbItem.save();
 
@@ -76,6 +78,7 @@ const añadirProductoCarrito = async (req, resp = response) => {
         return resp.status(200).json({
             ok: true,
             msg: 'Se agrego al Carrito',
+            data: dbCarrito
         })
 
     } catch (error) {
@@ -140,8 +143,36 @@ const updateProducto = async (req, resp = response) => {
 
 }
 
+const getProductobyId = async (req, resp = response) => {
+
+    const idProducto = req.params.id;
+
+    try {
+
+        const producto = await Producto.findById(idProducto)
+
+        if (!producto) {
+            return resp.status(404).json({
+                ok: false,
+                msg: 'Producto no Existe'
+            })
+        }
+
+        return resp.status(200).json(producto)
+
+        
+    } catch (error) {
+        console.log(error);
+
+        return resp.status(500).json({
+            ok: false,
+            msg: 'Error Inesperado'
+        })
+    }
+}
+
 const getAll = async (req, resp = response) => {
-    
+
     try {
 
         const productos = await Producto.find();
@@ -162,5 +193,6 @@ module.exports = {
     crearProducto,
     getAll,
     añadirProductoCarrito,
-    updateProducto
+    updateProducto,
+    getProductobyId
 }

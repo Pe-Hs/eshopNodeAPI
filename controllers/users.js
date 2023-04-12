@@ -1,11 +1,15 @@
 const { response } = require('express');
 const bcrypt = require('bcryptjs')
 const Usuario = require('../models/Usuario');
+const DetallesUsuario = require('../models/DetallesUsuario');
 
 const getUsuarios = async (req, resp = response) => {
 
     try {
-        const usuarios = await Usuario.find();
+        const usuarios = await DetallesUsuario.find()
+            .populate({
+                path: 'usuarioId'
+            });
 
         return resp.status(200).json(usuarios)
 
@@ -17,6 +21,10 @@ const getUsuarios = async (req, resp = response) => {
             msg: 'Error Inesperado'
         })
     }
+}
+
+const newDetalleUsuario = async(req , resp = response) => {
+    
 }
 
 const updateUsuario = async (req, resp = response) => {

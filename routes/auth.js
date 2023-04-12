@@ -8,7 +8,6 @@ const router = Router();
 
 //CREAR USUAROI
 router.post('/new', [
-    check('usuario', 'El usuario es Obligatorio').not().isEmpty(),
     check('email','El email es Obligatorio').isEmail(),
     check('password','La contraseña es Obligatoria').isLength({min: 6}),
     validarCampos
@@ -16,7 +15,7 @@ router.post('/new', [
 
 // INICIAR SESION
 router.post('/',[
-    check('usuario', 'El usuario es Obligatorio').not().isEmpty(),
+    check('email', 'El email es Obligatorio').not().isEmpty(),
     check('password', 'La contraseña es Obligatorio').isLength({min: 6}),
     validarCampos
 ], loginUsuario)

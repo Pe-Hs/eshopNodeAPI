@@ -7,4 +7,5 @@ const router = Router();
 router.get('/getAll', getUsuarios);
 router.put('/editUser/:id', updateUsuario)
 
+
 module.exports = router;

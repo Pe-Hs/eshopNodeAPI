@@ -1,26 +1,63 @@
 const { response } = require('express')
 const Carrito = require('../models/Carrito');
-const Producto = require('../models/Producto');
-
-const Usuario = require('../models/Usuario');
+const Item = require('../models/Item');
 
 const crearCarrito = async (req, resp = response) => {
 
-    const carrito = req.body;
+    const userId = req.body;
 
     try {
 
-        const dbCarrito = new Carrito(carrito);
+        const userCarrito = await Carrito.findOne(userId, { sort: { 'created_at': -1 } });
 
-        await dbCarrito.save();
+        if (userCarrito && userCarrito.estado == false) {
 
-        return resp.status(200).json({
-            ok: true,
-            msg: 'creado',
-            id: dbCarrito._id
-        })
+            const dbCarrito = new Carrito(userId);
+
+            dbCarrito.estado = true
+
+            await dbCarrito.save();
+
+            return resp.status(200).json({
+                ok: true,
+                msg: 'Carrito creado OP1',
+                id: dbCarrito._id
+            })
+
+        } else if (userCarrito && userCarrito.estado == true) {
+
+            return resp.status(200).json({
+                ok: true,
+                msg: 'Ya hay un Carrito creado',
+                id: userCarrito._id
+            })
+
+        } else if (!userCarrito) {
+
+            const dbCarrito = new Carrito(userId);
+
+            dbCarrito.estado = true
+
+            await dbCarrito.save();
+
+            return resp.status(200).json({
+                ok: true,
+                msg: 'Carrito creado OP2',
+                id: dbCarrito._id
+            })
+        } else {
+
+            return resp.status(200).json({
+                ok: true,
+                msg: 'Ya hay un Carrito creado',
+                id: userCarrito._id
+            })
+        }
+
+
 
     } catch (error) {
+
         console.log(error);
 
         return resp.status(500).json({
@@ -34,23 +71,36 @@ const crearCarrito = async (req, resp = response) => {
 
 const getCarrito = async (req, resp = response) => {
 
-    const id = req.header('x-id')
+    const id = req.params.id
 
-    var sum = 0; 
-    
+    var sum = 0;
+
     try {
 
         const dbCarrito = await Carrito.findById(id)
             .populate({
                 path: 'items',
+                populate: [
+                    {
+                        path: 'productoId'
+                    }
+                ]
             })
             .exec();
-        
-            dbCarrito.items.forEach(e => {
-                const add = e.total;
-                sum = sum + add;
-                console.log(e);
-            }); 
+
+        if (!dbCarrito) {
+            return resp.status(500).json({
+                ok: false,
+                msg: 'No hay Carrito'
+            })
+        }
+
+        dbCarrito.items.forEach(e => {
+            const add = e.total;
+            sum = sum + add;
+        });
+
+        dbCarrito.subTotal = sum;
 
         return resp.status(200).json(dbCarrito)
 
@@ -70,12 +120,12 @@ const removeProducto = async (req, resp = response) => {
 
     // const id = req.header('x-id');
     const id = req.params.id
-    const { items } = req.body;
+    const itemCart = req.body;
     var sum = 0;
 
     try {
 
-        let carrito = await Carrito.findById(id)
+        const carrito = await Carrito.findById(id)
 
         if (!carrito) {
             return resp.status(404).json({
@@ -87,18 +137,16 @@ const removeProducto = async (req, resp = response) => {
         carrito.items.forEach(e => {
             const add = e.total;
             sum = sum + add;
-        }); 
+        });
 
-        const s = await Carrito.findByIdAndUpdate(
+        await Carrito.findByIdAndUpdate(
             id,
             {
-                $pull: { items: items },
-                $set:  { subTotal: sum }
+                $pull: { items: itemCart.items },
             },
-            {
-                useFindAndModify: false
-            }
         );
+
+        await Item.findByIdAndDelete(itemCart.items)
 
         return resp.status(200).json({
             ok: true,
@@ -116,7 +164,72 @@ const removeProducto = async (req, resp = response) => {
 
 }
 
-const getAll = async ( req, resp = response) =>{
+const updateCantidad = async (req, resp = response) => {
+
+    const id = req.params.id
+    const body = req.body;
+    var sum = 0;
+
+    try {
+
+        const dbItem = await Item.findById(id)
+
+        if (!dbItem) {
+            return resp.status(404).json({
+                ok: false,
+                msg: 'No existe Item en el Carrito'
+            })
+        }
+
+
+        dbItem.total = body.cantidad * dbItem.precio;
+
+        await Item.findByIdAndUpdate(
+            id,
+            {
+                $set: { cantidad: body.cantidad,
+                        total: dbItem.total 
+                      }
+            }
+        )
+
+        const dbCarrito = await Carrito.findById(body.idCarrito)
+            .populate({
+                path: 'items'
+            }).exec()
+
+        dbCarrito.items.forEach(e => {
+            const add = e.total;
+            sum = sum + add;
+        });
+
+        await Carrito.findByIdAndUpdate(
+            body.idCarrito,
+            {
+                $set: { subTotal: sum }
+            }
+        )
+
+        return resp.status(200).json({
+            ok: true,
+            msg: 'Se modifico cantidad',
+        })
+
+
+    } catch (error) {
+        console.log(error);
+
+        return resp.status(500).json({
+            ok: false,
+            msg: 'Error Inesperado'
+        })
+    }
+
+
+
+}
+
+const getAll = async (req, resp = response) => {
     const carritos = await Carrito.find();
     resp.json(carritos)
 }
@@ -125,5 +238,6 @@ module.exports = {
     crearCarrito,
     getCarrito,
     removeProducto,
-    getAll
+    getAll,
+    updateCantidad
 }
