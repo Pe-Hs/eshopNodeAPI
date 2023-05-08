@@ -14,16 +14,16 @@ const crearUsuario = async (req, resp = response) => {
         // VERIFICAR EMAIL, USER , DNI, RUC
         let correo = await Usuario.findOne({ email });
 
-        let userDni = await DetallesUsuario.findOne({ dni });
+        // let userDni = await DetallesUsuario.findOne({ dni });
 
-        let userRuc = await DetallesUsuario.findOne({ ruc });
+        // let userRuc = await DetallesUsuario.findOne({ ruc });
 
-        if (userDni || userRuc) {
-            return resp.status(400).json({
-                ok: false,
-                msg: 'El usuario ya existe'
-            })
-        }
+        // if (userDni || userRuc) {
+        //     return resp.status(400).json({
+        //         ok: false,
+        //         msg: 'El usuario ya existe'
+        //     })
+        // }
 
         if (correo) {
             return resp.status(400).json({

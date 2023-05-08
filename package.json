@@ -15,7 +15,8 @@
     "express": "^4.18.2",
     "express-validator": "^6.14.2",
     "jsonwebtoken": "^9.0.0",
-    "mongoose": "^6.8.2"
+    "mongoose": "^6.8.2",
+    "multer": "^1.4.5-lts.1"
   },
   "author": "PeHs",
   "license": "ISC"

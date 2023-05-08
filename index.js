@@ -18,7 +18,7 @@ app.use( '/api/auth', require('./routes/auth') );
 app.use( '/api/producto', require('./routes/producto') );
 app.use( '/api/cart', require('./routes/carrito') );
 app.use( '/api/users', require('./routes/usuario') );
-
+app.use( '/public', express.static(`${__dirname}/storage/img`))
 
 app.listen(process.env.PORT , () =>{
     console.log(`Server running at port : ${process.env.PORT }`)

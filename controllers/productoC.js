@@ -20,6 +20,11 @@ const crearProducto = async (req, resp = response) => {
 
         const dbProducto = new Producto(req.body);
 
+        if (req.file) {
+            const { filename } = req.file
+            dbProducto.setImgUrl(filename)
+        }
+
         await dbProducto.save();
 
         return resp.status(200).json({
@@ -109,6 +114,10 @@ const updateProducto = async (req, resp = response) => {
             })
         }
 
+        if (req.file) {
+            const { filename } = req.file
+            producto.setImgUrl(filename)
+        }
 
         await Producto.findByIdAndUpdate(
             id,
@@ -120,7 +129,8 @@ const updateProducto = async (req, resp = response) => {
                     estado: estado,
                     cantidad: cantidad,
                     stock: stock,
-                    categoria: categoria
+                    categoria: categoria,
+                    imgProducto: producto.imgProducto
                 }
             }
         );
@@ -160,7 +170,7 @@ const getProductobyId = async (req, resp = response) => {
 
         return resp.status(200).json(producto)
 
-        
+
     } catch (error) {
         console.log(error);
 

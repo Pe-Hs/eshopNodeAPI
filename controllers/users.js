@@ -23,50 +23,45 @@ const getUsuarios = async (req, resp = response) => {
     }
 }
 
-const newDetalleUsuario = async(req , resp = response) => {
-    
-}
+const updateUsuarioCliente = async (req, resp = response) => {
 
-const updateUsuario = async (req, resp = response) => {
+    const usuarioId = req.params.id;
 
-    const id = req.params.id;
-
-    const { usuario, email, password, rol, nroCelular } = req.body;
+    const { email, nombreUsuario, apellidoUsuario, dni, ruc, nroCelular, direccion, departamento, ciudad, distrito } = req.body;
 
     try {
 
-        let findEmail = await Usuario.findOne({email});
+        const findIdUsuario = DetallesUsuario.where({usuarioId: usuarioId});
 
-        let findNroCelular = await Usuario.findOne({nroCelular});
+        const dbDetalleUsuario = await findIdUsuario.findOne({ usuarioId });
 
-        if(findEmail){
+        if (!dbDetalleUsuario) {
             return resp.status(400).json({
                 ok: false,
-                msg: 'El email ya existe'
+                msg: 'El Detalle de Usuario no existe'
             })
         }
 
-        if(findNroCelular){
-            return resp.status(400).json({
-                ok: false,
-                msg: 'El numero ya existe'
-            })
-        }
-
-        await Usuario.findByIdAndUpdate(
-            id,
+        await DetallesUsuario.findByIdAndUpdate(
+            dbDetalleUsuario._id,
             {
                 $set: {
-                    usuario: usuario,
-                    email: email,
-                    nroCelular: nroCelular
+                    nombreUsuario: nombreUsuario,
+                    apellidoUsuario: apellidoUsuario,
+                    dni: dni,
+                    ruc: ruc,
+                    nroCelular: nroCelular,
+                    direccion: direccion,
+                    departamento: departamento,
+                    ciudad: ciudad,
+                    distrito: distrito,
                 }
             }
         );
 
         return resp.status(200).json({
             ok: true,
-            msg: 'Producto Actualizado'
+            msg: 'Detalles de Usuario Actualizado',
         })
 
     } catch (error) {
@@ -80,7 +75,41 @@ const updateUsuario = async (req, resp = response) => {
 
 }
 
+const getUsuario = async (req, resp = response) => {
+
+    const idUsuario = req.params.id;
+
+    try {
+
+        const findIdUsuario = DetallesUsuario.where({usuarioId: idUsuario});
+
+        const dbDetallesUsuario = await findIdUsuario.findOne()
+            .populate({
+                path: 'usuarioId'
+            }).exec();
+
+        if (!dbDetallesUsuario) {
+            return resp.status(404).json({
+                ok: false,
+                msg: 'No existe Usuario'
+            })
+        }
+
+        return resp.status(200).json(dbDetallesUsuario)
+
+
+    } catch (error) {
+        console.log(error);
+
+        return resp.status(500).json({
+            ok: false,
+            msg: 'Error Inesperado'
+        })
+    }
+}
+
 module.exports = {
     getUsuarios,
-    updateUsuario
+    updateUsuarioCliente,
+    getUsuario,
 }
