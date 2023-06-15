@@ -5,39 +5,51 @@ const DetalleUsuarioSchema = Schema({
         type: Schema.Types.ObjectId,
         ref: "Usuario",
     },
-    nombreUsuario:{
+    nombreUsuario: {
         type: String,
-       
+
     },
-    apellidoUsuario:{
+    apellidoUsuario: {
         type: String,
-       
+
     },
-    dni:{
+    dni: {
         type: String,
+        default: '00000000'
     },
-    ruc:{
+    ruc: {
         type: String,
+
     },
-    nroCelular:{
+    nroCelular: {
         type: String,
-        
+
     },
     direccion: {
         type: String,
-        
+        default: ''
     },
-    departamento:{
+    departamento: {
         type: String,
     },
-    ciudad :{
+    ciudad: {
         type: String,
-       
+
     },
-    distrito :{
+    distrito: {
         type: String,
-        
+
     },
+    imgUsuario: {
+        type: String
+    }
+},
+{
+    timestamps: true,
 });
+
+DetalleUsuarioSchema.methods.setImgUrl = function setImgUrl(filename) {
+    this.imgUsuario = `${process.env.APP_HOST}:${process.env.PORT}/public/${filename}`
+}
 
 module.exports = model('DetalleUsuario', DetalleUsuarioSchema);

@@ -35,6 +35,14 @@ const ProductoSchema = Schema ({
     },
     imgProducto: {
         type: String
+    },
+    mostrarProducto: {
+        type: Boolean,
+        default: true
+    },
+    pesoProducto: {
+        type: Number,
+        default: 0
     }
 },
     {
