@@ -27,13 +27,13 @@ const updateUsuarioCliente = async (req, resp = response) => {
 
     const usuarioId = req.params.id;
 
-    const { email, nombreUsuario, apellidoUsuario, dni, ruc, nroCelular, direccion, departamento, ciudad, distrito } = req.body;
+    const { nombreUsuario, apellidoUsuario, dni, ruc, nroCelular, direccion, departamento, ciudad, distrito } = req.body;
 
     try {
 
         const findIdUsuario = DetallesUsuario.where({usuarioId: usuarioId});
 
-        const dbDetalleUsuario = await findIdUsuario.findOne({ usuarioId });
+        const dbDetalleUsuario = await findIdUsuario.findOne();
 
         if (!dbDetalleUsuario) {
             return resp.status(400).json({
@@ -42,7 +42,12 @@ const updateUsuarioCliente = async (req, resp = response) => {
             })
         }
 
-        await DetallesUsuario.findByIdAndUpdate(
+        if (req.file) {
+            const { filename } = req.file
+            dbDetalleUsuario.setImgUrl(filename)
+        }
+
+        const Ordenresp = await DetallesUsuario.findByIdAndUpdate(
             dbDetalleUsuario._id,
             {
                 $set: {
@@ -55,13 +60,16 @@ const updateUsuarioCliente = async (req, resp = response) => {
                     departamento: departamento,
                     ciudad: ciudad,
                     distrito: distrito,
+                    imgUsuario: dbDetalleUsuario.imgUsuario
                 }
             }
         );
 
+
         return resp.status(200).json({
             ok: true,
             msg: 'Detalles de Usuario Actualizado',
+            data1: dbDetalleUsuario,
         })
 
     } catch (error) {

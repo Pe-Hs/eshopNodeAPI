@@ -4,56 +4,101 @@ const Item = require('../models/Item');
 
 const crearCarrito = async (req, resp = response) => {
 
-    const userId = req.body;
+    const {cliente} = req.body;
 
     try {
 
-        const userCarrito = await Carrito.findOne(userId, { sort: { 'created_at': -1 } });
+        const query = Carrito.where({cliente : cliente});
+        const userCarrito = await query.findOne({ sort: { 'created_at': -1 } })
 
-        if (userCarrito && userCarrito.estado == false) {
 
-            const dbCarrito = new Carrito(userId);
+        if(!userCarrito){
 
-            dbCarrito.estado = true
+            const dbCarrito1 = new Carrito(req.body);
 
-            await dbCarrito.save();
+            dbCarrito1.estado = true
+
+            await dbCarrito1.save();
+
+            return resp.status(200).json({
+                ok: true,
+                msg: 'Carrito creado - New',
+                id: dbCarrito1._id
+            })
+
+        } else if(userCarrito && userCarrito.estado == false){
+
+            const dbCarrito2 = new Carrito(req.body);
+
+            dbCarrito2.estado = true
+
+            await dbCarrito2.save();
 
             return resp.status(200).json({
                 ok: true,
                 msg: 'Carrito creado OP1',
-                id: dbCarrito._id
+                id: dbCarrito2._id
             })
-
-        } else if (userCarrito && userCarrito.estado == true) {
+        } else if(userCarrito && userCarrito.estado == true){
 
             return resp.status(200).json({
                 ok: true,
-                msg: 'Ya hay un Carrito creado',
+                msg: 'Ya hay un Carrito creado - True',
                 id: userCarrito._id
             })
 
-        } else if (!userCarrito) {
-
-            const dbCarrito = new Carrito(userId);
-
-            dbCarrito.estado = true
-
-            await dbCarrito.save();
+        }else {
 
             return resp.status(200).json({
                 ok: true,
-                msg: 'Carrito creado OP2',
-                id: dbCarrito._id
-            })
-        } else {
-
-            return resp.status(200).json({
-                ok: true,
-                msg: 'Ya hay un Carrito creado',
+                msg: 'Ya hay un Carrito creado - F',
                 id: userCarrito._id
             })
         }
 
+        // if ( userCarrito.estado == false) {
+
+        //     const dbCarrito = new Carrito(req.body);
+
+        //     dbCarrito.estado = true
+
+        //     await dbCarrito.save();
+
+        //     return resp.status(200).json({
+        //         ok: true,
+        //         msg: 'Carrito creado OP1',
+        //         id: dbCarrito._id
+        //     })
+
+        // } else if (userCarrito.estado == true) {
+
+        //     return resp.status(200).json({
+        //         ok: true,
+        //         msg: 'Ya hay un Carrito creado - True',
+        //         id: userCarrito._id
+        //     })
+
+        // } else if (!userCarrito) {
+
+        //     const dbCarrito = new Carrito(req.body);
+
+        //     dbCarrito.estado = true
+
+        //     await dbCarrito.save();
+
+        //     return resp.status(200).json({
+        //         ok: true,
+        //         msg: 'Carrito creado OP2',
+        //         id: dbCarrito._id
+        //     })
+        // } else {
+
+        //     return resp.status(200).json({
+        //         ok: true,
+        //         msg: 'Ya hay un Carrito creado - F',
+        //         id: userCarrito._id
+        //     })
+        // }
 
 
     } catch (error) {
@@ -100,9 +145,27 @@ const getCarrito = async (req, resp = response) => {
             sum = sum + add;
         });
 
-        dbCarrito.subTotal = sum;
+       // dbCarrito.subTotal = sum;
 
-        return resp.status(200).json(dbCarrito)
+        await Carrito.findByIdAndUpdate(
+            id,
+            {
+                $set : { subTotal : sum}
+            }
+        )
+
+        const dbCarrito2 = await Carrito.findById(id)
+            .populate({
+                path: 'items',
+                populate: [
+                    {
+                        path: 'productoId'
+                    }
+                ]
+            })
+            .exec();
+
+        return resp.status(200).json(dbCarrito2)
 
 
     } catch (error) {
@@ -229,6 +292,75 @@ const updateCantidad = async (req, resp = response) => {
 
 }
 
+const updateStateCarrito = async (req, resp = response) => {
+
+    const id = req.params.id
+
+    try {
+
+        const carrito = await Carrito.findById(id)
+
+        if (!carrito) {
+            return resp.status(404).json({
+                ok: false,
+                msg: 'No existe el Carrito'
+            })
+        }
+
+        await carrito.updateOne({
+            estado: false
+        })
+
+        return resp.status(200).json({
+            ok: true,
+            msg: 'Se modifico Carrito',
+        })
+        
+    } catch (error) {
+        console.log(error);
+
+        return resp.status(500).json({
+            ok: false,
+            msg: 'Error Inesperado'
+        })
+    }
+}
+
+const getCarritosUser = async (req, resp = response) => {
+
+    const idUser = req.params.id
+    var sum = 0;
+
+    try {
+
+        const query = Carrito.where({cliente: idUser, estado: false})
+        const dbCarrito = await query.find().populate({
+            path: 'items',
+            populate: {
+                path: 'productoId',
+            }
+        }).populate('cliente')
+
+
+        if(!dbCarrito){
+            return resp.status(400).json({
+                ok: false,
+                msg: 'No hay Carritos',
+            })
+        }
+
+        return resp.status(200).json(dbCarrito)
+        
+    } catch (error) {
+        console.log(error);
+
+        return resp.status(500).json({
+            ok: false,
+            msg: 'Error Inesperado'
+        })
+    }
+}
+
 const getAll = async (req, resp = response) => {
     const carritos = await Carrito.find();
     resp.json(carritos)
@@ -239,5 +371,7 @@ module.exports = {
     getCarrito,
     removeProducto,
     getAll,
-    updateCantidad
+    updateCantidad,
+    updateStateCarrito,
+    getCarritosUser
 }

@@ -7,23 +7,15 @@ const DetallesUsuario = require('../models/DetallesUsuario');
 
 const crearUsuario = async (req, resp = response) => {
 
-    const { email, password, rol, nombreUsuario, apellidoUsuario, dni, ruc, nroCelular, departamento, direccion, ciudad, distrito } = req.body;
+    const { email, password, nombreUsuario, apellidoUsuario} = req.body;
 
     try {
 
         // VERIFICAR EMAIL, USER , DNI, RUC
-        let correo = await Usuario.findOne({ email });
 
-        // let userDni = await DetallesUsuario.findOne({ dni });
+        const findEmailUsuario = Usuario.where({ email : email})
 
-        // let userRuc = await DetallesUsuario.findOne({ ruc });
-
-        // if (userDni || userRuc) {
-        //     return resp.status(400).json({
-        //         ok: false,
-        //         msg: 'El usuario ya existe'
-        //     })
-        // }
+        let correo = await findEmailUsuario.findOne();
 
         if (correo) {
             return resp.status(400).json({
@@ -51,13 +43,6 @@ const crearUsuario = async (req, resp = response) => {
             usuarioId: dbUsuario.id,
             nombreUsuario: nombreUsuario,
             apellidoUsuario: apellidoUsuario,
-            dni: dni,
-            ruc: ruc,
-            nroCelular: nroCelular,
-            direccion: direccion,
-            departamento: departamento,
-            ciudad: ciudad,
-            distrito: distrito
         }
 
         const dbDetalleUsuario = new DetallesUsuario(newDetalles)
@@ -89,7 +74,8 @@ const loginUsuario = async (req, resp = response) => {
 
     try {
 
-        const dbUsuario = await Usuario.findOne({ email });
+        const queryUsuario = Usuario.where({email : email});
+        const dbUsuario = await queryUsuario.findOne();
 
         if (!dbUsuario) {
             return resp.status(400).json({

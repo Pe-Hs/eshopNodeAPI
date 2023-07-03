@@ -5,13 +5,15 @@ const Item = require('../models/Item');
 
 const crearProducto = async (req, resp = response) => {
 
-    const { nombreProducto, descripcionProducto, precioUnitario } = req.body;
+    const { nombreProducto, pesoProducto } = req.body;
 
     try {
 
-        let producto = await Producto.findOne({ nombreProducto })
+        const queryProducto = Producto.where({nombreProducto: nombreProducto, pesoProducto: pesoProducto})
+        
+        let productExist = await queryProducto.findOne()
 
-        if (producto) {
+        if (productExist) {
             return resp.status(400).json({
                 ok: false,
                 msg: 'Producto ya Existe'
@@ -97,13 +99,42 @@ const añadirProductoCarrito = async (req, resp = response) => {
 
 }
 
+const getStockMinProducto = async (req, resp = response) => {
+    
+    const minStock = req.params.min
+
+    try {
+
+        const getAllProductos = await Producto.find()
+        var productosFiltered = []
+
+        getAllProductos.forEach(e => {
+            if(e.stock < minStock){
+                productosFiltered.push(e)
+            }
+        });
+        
+        return resp.status(200).json(productosFiltered)
+
+    } catch (error) {
+        console.log(error);
+
+        return resp.status(500).json({
+            ok: false,
+            msg: 'Error Inesperado'
+        })
+    }
+}
+
 const updateProducto = async (req, resp = response) => {
 
     const id = req.params.id;
 
-    const { nombreProducto, descripcionProducto, precioUnitario, estado, cantidad, stock, categoria } = req.body;
+    const { nombreProducto, descripcionProducto, precioUnitario, estado, cantidad, stock, categoria, pesoProducto, mostrarProducto } = req.body;
 
     try {
+
+        var estadoAct = '';
 
         let producto = await Producto.findById(id);
 
@@ -130,6 +161,8 @@ const updateProducto = async (req, resp = response) => {
                     cantidad: cantidad,
                     stock: stock,
                     categoria: categoria,
+                    pesoProducto: pesoProducto,
+                    mostrarProducto: mostrarProducto,
                     imgProducto: producto.imgProducto
                 }
             }
@@ -181,6 +214,59 @@ const getProductobyId = async (req, resp = response) => {
     }
 }
 
+const getProductosbyCategoria = async (req, resp = response) => {
+
+    const categoriaName = req.params.categoria;
+
+    try {
+        const queryProducto = Producto.where({categoria: categoriaName});
+        const dbProducto = await queryProducto.find().exec();
+        
+        return resp.status(200).json({
+            data: dbProducto
+        })
+
+    } catch (error) {
+        console.log(error);
+
+        return resp.status(500).json({
+            ok: false,
+            msg: 'Error Inesperado'
+        })
+    }
+}
+
+const deleteProductoById= async (req = resp = response) => {
+
+  const idProducto = req.params.id;
+
+    try {
+
+        const producto = await Producto.findByIdAndDelete(idProducto)
+
+        if (!producto) {
+            return resp.status(404).json({
+                ok: false,
+                msg: 'Producto no Existe'
+            })
+        }
+
+        return resp.status(200).json({
+            ok: true,
+            msg: 'Producto eliminado'
+        })
+
+
+    } catch (error) {
+        console.log(error);
+
+        return resp.status(500).json({
+            ok: false,
+            msg: 'Error Inesperado'
+        })
+    }
+}
+
 const getAll = async (req, resp = response) => {
 
     try {
@@ -204,5 +290,8 @@ module.exports = {
     getAll,
     añadirProductoCarrito,
     updateProducto,
-    getProductobyId
+    getProductobyId,
+    getProductosbyCategoria,
+    deleteProductoById,
+    getStockMinProducto
 }
