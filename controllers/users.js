@@ -116,8 +116,45 @@ const getUsuario = async (req, resp = response) => {
     }
 }
 
+
+const getUsuarioFlutter = async (req, resp = response) => {
+
+    const idUsuario = req.params.id;
+
+    try {
+
+        const findIdUsuario = DetallesUsuario.where({usuarioId: idUsuario});
+
+        const dbDetallesUsuario = await findIdUsuario.findOne()
+            .populate({
+                path: 'usuarioId'
+            }).exec();
+
+        if (!dbDetallesUsuario) {
+            return resp.status(404).json({
+                ok: false,
+                msg: 'No existe Usuario'
+            })
+        }
+
+        return resp.status(200).json({
+            data: [dbDetallesUsuario]
+        })
+
+
+    } catch (error) {
+        console.log(error);
+
+        return resp.status(500).json({
+            ok: false,
+            msg: 'Error Inesperado'
+        })
+    }
+}
+
 module.exports = {
     getUsuarios,
     updateUsuarioCliente,
     getUsuario,
+    getUsuarioFlutter,
 }

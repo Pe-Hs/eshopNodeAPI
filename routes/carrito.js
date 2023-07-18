@@ -1,6 +1,6 @@
 const {Router} = require('express');
 const { check } = require('express-validator');
-const { getCarritosUser, updateStateCarrito, getAll, crearCarrito, getCarrito, removeProducto, updateCantidad } = require('../controllers/carrito');
+const { getCarritoFlutter, getCarritosUser, updateStateCarrito, getAll, crearCarrito, getCarrito, removeProducto, updateCantidad } = require('../controllers/carrito');
 
 const router = Router();
 
@@ -12,6 +12,7 @@ router.put('/upState/:id', updateStateCarrito)
 
 router.get('/getall', getAll)
 router.get('/getcart/:id', getCarrito)
+router.get('/getcartF/:id', getCarritoFlutter)
 router.get('/getCarritosUser/:id', getCarritosUser)
 
 

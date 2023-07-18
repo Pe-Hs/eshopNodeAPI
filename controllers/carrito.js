@@ -9,7 +9,7 @@ const crearCarrito = async (req, resp = response) => {
     try {
 
         const query = Carrito.where({cliente : cliente});
-        const userCarrito = await query.findOne({ sort: { 'created_at': -1 } })
+        const userCarrito = await query.findOne().sort({ createdAt: 'desc' })
 
 
         if(!userCarrito){
@@ -56,6 +56,7 @@ const crearCarrito = async (req, resp = response) => {
             })
         }
 
+        //----------------------------------------------------------
         // if ( userCarrito.estado == false) {
 
         //     const dbCarrito = new Carrito(req.body);
@@ -166,6 +167,73 @@ const getCarrito = async (req, resp = response) => {
             .exec();
 
         return resp.status(200).json(dbCarrito2)
+
+
+    } catch (error) {
+        console.log(error);
+
+        return resp.status(500).json({
+            ok: false,
+            msg: 'Error Inesperado'
+        })
+    }
+
+}
+
+const getCarritoFlutter = async (req, resp = response) => {
+
+    const id = req.params.id
+
+    var sum = 0;
+
+    try {
+
+        const dbCarrito = await Carrito.findById(id)
+            .populate({
+                path: 'items',
+                populate: [
+                    {
+                        path: 'productoId'
+                    }
+                ]
+            })
+            .exec();
+
+        if (!dbCarrito) {
+            return resp.status(500).json({
+                ok: false,
+                msg: 'No hay Carrito'
+            })
+        }
+
+        dbCarrito.items.forEach(e => {
+            const add = e.total;
+            sum = sum + add;
+        });
+
+       // dbCarrito.subTotal = sum;
+
+        await Carrito.findByIdAndUpdate(
+            id,
+            {
+                $set : { subTotal : sum}
+            }
+        )
+
+        const dbCarrito2 = await Carrito.findById(id)
+            .populate({
+                path: 'items',
+                populate: [
+                    {
+                        path: 'productoId'
+                    }
+                ]
+            })
+            .exec();
+
+        return resp.status(200).json({
+            data: [dbCarrito2]
+        })
 
 
     } catch (error) {
@@ -373,5 +441,6 @@ module.exports = {
     getAll,
     updateCantidad,
     updateStateCarrito,
-    getCarritosUser
+    getCarritosUser,
+    getCarritoFlutter
 }
