@@ -23,6 +23,7 @@ app.use( '/api/compra' ,     require('./routes/compra'));
 app.use( '/api/proveedor' ,  require('./routes/provedor'));
 app.use( '/api/insumo' ,     require('./routes/insumo'));
 app.use( '/api/stats' ,      require('./routes/estadistica'));
+app.use( '/api/fav' ,        require('./routes/favoritos'));
 
 app.use( '/public', express.static(`${__dirname}/storage/img`))
 app.use( '/public', express.static(`${__dirname}/storage/boletaCompras`))

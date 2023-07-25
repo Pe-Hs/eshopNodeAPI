@@ -1,6 +1,6 @@
 
 const { check } = require('express-validator');
-const { getStockMinProducto, crearProducto, añadirProductoCarrito, getAll, updateProducto, getProductobyId, getProductosbyCategoria } = require('../controllers/productoC');
+const { getLowPrices, getStockMinProducto, crearProducto, añadirProductoCarrito, getAll, updateProducto, getProductobyId, getProductosbyCategoria } = require('../controllers/productoC');
 const { Router } = require('express');
 
 const router = Router();
@@ -13,6 +13,7 @@ router.put('/edit/:id', upload.single('image'), updateProducto)
 router.get('/getProducto/:id', getProductobyId)
 router.get('/getCategoria/:categoria', getProductosbyCategoria)
 router.get('/getMinStockProdcuto/:min', getStockMinProducto)
+router.get('/getLow', getLowPrices)
 
 router.get('/', getAll)
 

@@ -285,6 +285,25 @@ const getAll = async (req, resp = response) => {
 
 }
 
+const getLowPrices = async (req, resp = response) => {
+    try {
+
+        const query = Producto.where({ "precioUnitario" : { "$lt": 5 }})
+        const productos = await query.find();
+        resp.json({
+            data: productos
+        })
+
+    } catch (error) {
+        console.log(error);
+
+        return resp.status(500).json({
+            ok: false,
+            msg: 'Error Inesperado'
+        })
+    }
+}
+
 module.exports = {
     crearProducto,
     getAll,
@@ -293,5 +312,6 @@ module.exports = {
     getProductobyId,
     getProductosbyCategoria,
     deleteProductoById,
-    getStockMinProducto
+    getStockMinProducto,
+    getLowPrices
 }
